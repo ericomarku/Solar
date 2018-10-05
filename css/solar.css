@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+}
+
+div {
+  position: absolute;
+  pointer-events: none;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  padding: 20px;
+}
+
+div > * {
+  font-family: Calibri Light;
+  color: white;
+}
