@@ -12,6 +12,8 @@ let MDscale = 17000;
 let tscale = 365.256363004/360;
 let bg = 0;
 
+let path = true;
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
@@ -75,10 +77,12 @@ function setup() {
   //pluto
   DPlaneter[0] = new StellarOjbect(1188*10, 7375927931, 4436824613, 122.53, 17.16, 0, 90610.56, 200, 200, 200);
 
-  for (var i = 0; i < 500; i++) {
-    var theta = random(0, TWO_PI);
-    var phi = random(0, TWO_PI);
-    Star[i] = new Stars(4436824613/Dscale, theta, phi);
+  if (path) {
+    for (var i = 0; i < 500; i++) {
+      var theta = random(0, TWO_PI);
+      var phi = random(0, TWO_PI);
+      Star[i] = new Stars(4436824613/Dscale, theta, phi);
+    }
   }
 }
 
@@ -124,6 +128,13 @@ function draw() {
   }
 }
 
+function pathOnOff(){
+  if (path) {
+    path = false;
+  } else if (!path) {
+    path = true;
+  }
+}
 
 class Sun {
   constructor(radius, spin, r, g, b, c) {
@@ -171,7 +182,7 @@ class StellarOjbect {
 
   path() {
     if (this.aphelion > 616081456/Dscale) {
-      strokeWeight(20);
+      strokeWeight(15);
     } else {
       strokeWeight(4);
     }
@@ -198,13 +209,6 @@ class StellarOjbect {
     ambientMaterial(this.red, this.green, this.blue);
     sphere(this.radius);
     pop();
-    //push();
-    //  noStroke();
-    //  rotateX(PI/2);
-    //  rotateY(this.orbitaltilt*PI/180);
-    //  ambientMaterial(this.red, this.green, this.blue);
-    //  torus(this.semimajoraxis, 0.5, 360, 5);
-    //pop();
   }
 }
 
