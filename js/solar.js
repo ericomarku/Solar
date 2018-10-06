@@ -5,11 +5,11 @@ let JupiterMoons = [];
 let Ring = [];
 let Star = [];
 
-let Sskale = 17*500;
-let Pskale = 500;
-let Dskale = 610000;
-let MDskale = 17000;
-let tskale = 365.256363004/360;
+let Sscale = 17*500;
+let Pscale = 500;
+let Dscale = 610000;
+let MDscale = 17000;
+let tscale = 365.256363004/360;
 let bg = 0;
 
 function windowResized() {
@@ -17,6 +17,7 @@ function windowResized() {
 }
 
 function setup() {
+  // WEBGL
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   canvas.position(0, 0);
   canvas.style('z-index', '-1');
@@ -77,7 +78,7 @@ function setup() {
   for (var i = 0; i < 500; i++) {
     var theta = random(0, TWO_PI);
     var phi = random(0, TWO_PI);
-    Star[i] = new Stars(4436824613/Dskale, theta, phi);
+    Star[i] = new Stars(4436824613/Dscale, theta, phi);
   }
 }
 
@@ -115,12 +116,18 @@ function draw() {
   for(star of Star){
     star.show();
   }
+  for(planet of Planeter){
+    planet.path();
+  }
+  for(moon of Moon){
+    moon.path();
+  }
 }
 
 
 class Sun {
   constructor(radius, spin, r, g, b, c) {
-    this.radius = radius/Sskale;
+    this.radius = radius/Sscale;
     this.spin = spin;
     this.red = r;
     this.green = g;
@@ -144,9 +151,9 @@ class Sun {
 
 class StellarOjbect {
   constructor(radius, Aphelion, Perihelion, at, ot, spin, orbitalperiod, r, g, b) {
-    this.radius = radius/Pskale;
-    this.aphelion = Aphelion/Dskale;
-    this.perihelion = Perihelion/Dskale;
+    this.radius = radius/Pscale;
+    this.aphelion = Aphelion/Dscale;
+    this.perihelion = Perihelion/Dscale;
     this.semimajoraxis = -(this.aphelion + this.perihelion) / 2 - sun.radius;
     this.orbitalperiod = orbitalperiod;
     this.axialtilt = at;
@@ -159,8 +166,26 @@ class StellarOjbect {
   }
 
   move() {
-    this.angle = this.angle + (365 * PI/180)/(this.orbitalperiod * tskale);
+    this.angle = this.angle + (365.256363004 * PI/180)/(this.orbitalperiod * tscale);
   }
+
+  path() {
+    if (this.aphelion > 616081456/Dscale) {
+      strokeWeight(20);
+    } else {
+      strokeWeight(4);
+    }
+    stroke(this.red, this.green, this.blue);
+    noFill();
+    beginShape();
+    for (var i = 0; i < 360; i++) {
+      var x = this.semimajoraxis * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion);
+      var y = this.semimajoraxis * tan(this.orbitaltilt * PI/180) * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
+      var z = -sqrt((this.aphelion * this.perihelion)) * cos((i/360) * TWO_PI);
+      vertex(x, y, z);
+    };
+    endShape(CLOSE);
+  };
 
   show() {
     this.x = this.semimajoraxis * sin(this.angle) + (this.aphelion - this.perihelion);
@@ -186,9 +211,9 @@ class StellarOjbect {
 class Moons {
   constructor(planet, radius, Aphelion, Perihelion, axialtilt, orbitaltilt, orbitalperiod, r, g, b) {
     this.planet = planet;
-    this.radius = radius/Pskale;
-    this.aphelion = Aphelion/MDskale;
-    this.perihelion = Perihelion/MDskale;
+    this.radius = radius/Pscale;
+    this.aphelion = Aphelion/MDscale;
+    this.perihelion = Perihelion/MDscale;
     this.semimajoraxis = (this.aphelion + this.perihelion)/2;
     this.orbitalperiod = orbitalperiod;
     this.axialtilt = axialtilt;
@@ -200,8 +225,24 @@ class Moons {
   }
 
   move() {
-    this.angle = this.angle + (365 * PI/180)/(this.orbitalperiod * tskale);
+    this.angle = this.angle + (365.256363004 * PI/180)/(this.orbitalperiod * tscale);
   }
+
+  path() {
+    strokeWeight(1);
+    stroke(this.red, this.green, this.blue);
+    noFill();
+    translate(Planeter[this.planet].x, Planeter[this.planet].y, Planeter[this.planet].z)
+    rotateZ((Planeter[this.planet].axialtilt - this.axialtilt) * PI/180);
+    beginShape();
+    for (var i = 0; i < 360; i++) {
+      var x = this.semimajoraxis * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion) + Planeter[this.planet].radius * sin((i/360) * TWO_PI);
+      var y = this.semimajoraxis * tan(this.orbitaltilt * PI/180) * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
+      var z = -sqrt((this.aphelion * this.perihelion)) * cos((i/360) * TWO_PI) - Planeter[this.planet].radius * cos((i/360) * TWO_PI);
+      vertex(x, y, z);
+    };
+    endShape(CLOSE);
+  };
 
   show() {
     this.x = this.semimajoraxis * sin(this.angle) + (this.aphelion - this.perihelion) + Planeter[this.planet].radius * sin(this.angle);
@@ -220,7 +261,7 @@ class Moons {
 
 class Rings {
   constructor(radius, planet, r, g, b) {
-    this.radius = radius/Pskale;
+    this.radius = radius/Pscale;
     this.planet = planet;
     this.red = r;
     this.green = g;
@@ -253,7 +294,7 @@ class Stars {
     rotateZ(this.phi);
     translate(this.distans, 0, 0);
     ambientMaterial(255, 255, 255);
-    sphere(5000/Pskale);
+    sphere(5000/Pscale);
     pop();
   }
 }
