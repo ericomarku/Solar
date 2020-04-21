@@ -5,12 +5,14 @@ let JupiterMoons = [];
 let Ring = [];
 let Star = [];
 
-let Sscale = 17*500;
+let Sscale = 20*500;
 let Pscale = 500;
-let Dscale = 610000;
-let MDscale = 17000;
-let tscale = 365.256363004/360;
+let Dscale = 900000;
+let MDscale = 27000;
+let tscale = 1;
 let bg = 0;
+
+let Sslider, Pslider, Dslider, MDslider;
 
 let path = true;
 
@@ -23,6 +25,30 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   canvas.position(0, 0);
   canvas.style('z-index', '-1');
+
+  Sslider = createSlider(0.1, 2, 1, 0);
+  Sslider.position(10, 10);
+  Sslider.style('width', '200px');
+
+  Pslider = createSlider(0.3, 2, 1, 0);
+  Pslider.position(10, 30);
+  Pslider.style('width', '200px');
+
+  Dslider = createSlider(0.1, 10, 1, 0);
+  Dslider.position(10, 50);
+  Dslider.style('width', '200px');
+
+  Stextbox = createSpan('');
+  Stextbox.position(220, 10);
+  Stextbox.style('color', 'white');
+
+  Ptextbox = createSpan('');
+  Ptextbox.position(220, 30);
+  Ptextbox.style('color', 'white');
+
+  Dtextbox = createSpan('');
+  Dtextbox.position(220, 50);
+  Dtextbox.style('color', 'white');
 
   sun = new Sun(695700, 0, 255, 185, 0, PI);
 
@@ -87,13 +113,22 @@ function setup() {
 }
 
 function draw() {
+
   background(bg);
+  rotateX(-PI/10);
 
   orbitControl();
 
   pointLight(255, 255, 255, 0, 0, -1000);
   //ambientLight(50);
 
+  Sscaleval = Sslider.value();
+  Pscaleval = Pslider.value();
+  Dscaleval = Dslider.value();
+
+  Stextbox.html('1:' + (Sscale*Sscaleval));
+  Ptextbox.html('1:' + (Pscale*Pscaleval));
+  Dtextbox.html('1:' + (Dscale*Dscaleval));
 
   sun.show();
   sun.move();
@@ -122,6 +157,9 @@ function draw() {
   }
   for(planet of Planeter){
     planet.path();
+  }
+  for(dplanet of DPlaneter){
+    dplanet.path();
   }
   for(moon of Moon){
     moon.path();
@@ -155,7 +193,7 @@ class Sun {
       noStroke()
       translate(0, 0, 0)
       fill(this.red, this.green + 20 * sin(this.colorchange), this.blue);
-      sphere(this.radius);
+      sphere(this.radius/Sscaleval);
     pop();
   }
 }
@@ -163,51 +201,58 @@ class Sun {
 class StellarOjbect {
   constructor(radius, Aphelion, Perihelion, at, ot, spin, orbitalperiod, r, g, b) {
     this.radius = radius/Pscale;
-    this.aphelion = Aphelion/Dscale;
-    this.perihelion = Perihelion/Dscale;
-    this.semimajoraxis = -(this.aphelion + this.perihelion) / 2 - sun.radius;
+    this.aphelion = Aphelion/Dscale + sun.radius;
+    this.perihelion = Perihelion/Dscale + sun.radius;
+    this.semimajoraxis = (this.aphelion + this.perihelion) / 2;
+    this.semiminoraxis = Math.sqrt(this.aphelion * this.perihelion);
     this.orbitalperiod = orbitalperiod;
     this.axialtilt = at;
     this.orbitaltilt = ot;
     this.spin = spin;
-    this.angle = 0;
+    this.angle = -PI/2;
     this.red = r;
     this.green = g;
     this.blue = b;
   }
 
   move() {
-    this.angle = this.angle + (365.256363004 * PI/180)/(this.orbitalperiod * tscale);
+    this.angle = this.angle - (365.256363004 * PI/180)/(this.orbitalperiod * tscale);
   }
 
   path() {
     if (this.aphelion > 616081456/Dscale) {
       strokeWeight(15);
     } else {
-      strokeWeight(4);
+      strokeWeight(5);
     }
     stroke(this.red, this.green, this.blue);
     noFill();
     beginShape();
     for (var i = 0; i < 360; i++) {
-      var x = this.semimajoraxis * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion);
-      var y = this.semimajoraxis * tan(this.orbitaltilt * PI/180) * sin((i/360) * TWO_PI) + (this.aphelion - this.perihelion) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
-      var z = -sqrt((this.aphelion * this.perihelion)) * cos((i/360) * TWO_PI);
+      var x = (this.semimajoraxis * sin((i/360) * TWO_PI)) + (this.aphelion - this.semimajoraxis);
+      var y = (this.semimajoraxis * tan(this.orbitaltilt * PI/180) * sin((i/360) * TWO_PI)) + (this.aphelion - this.semimajoraxis) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
+      var z = this.semiminoraxis * cos((i/360) * TWO_PI);
+      x = x/Dscaleval;
+      y = y/Dscaleval;
+      z = z/Dscaleval;
       vertex(x, y, z);
     };
     endShape(CLOSE);
   };
 
   show() {
-    this.x = this.semimajoraxis * sin(this.angle) + (this.aphelion - this.perihelion);
-    this.y = this.semimajoraxis * tan(this.orbitaltilt * PI/180) * sin(this.angle) + (this.aphelion - this.perihelion) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
-    this.z = -sqrt((this.aphelion * this.perihelion)) * cos(this.angle);
+    this.x = this.semimajoraxis * cos(this.angle) + (this.aphelion - this.semimajoraxis);
+    this.y = this.semimajoraxis * tan(this.orbitaltilt * PI/180) * cos(this.angle) + (this.aphelion - this.semimajoraxis) * cos(this.orbitaltilt * PI/180) * tan(this.orbitaltilt * PI/180);
+    this.z = this.semiminoraxis * sin(this.angle);
+    this.x = this.x/Dscaleval;
+    this.y = this.y/Dscaleval;
+    this.z = this.z/Dscaleval;
     push();
     noStroke();
     translate(this.x, this.y, this.z);
     rotateZ(this.axialtilt * PI/180);
     ambientMaterial(this.red, this.green, this.blue);
-    sphere(this.radius);
+    sphere(this.radius/Pscaleval);
     pop();
   }
 }
@@ -219,6 +264,7 @@ class Moons {
     this.aphelion = Aphelion/MDscale;
     this.perihelion = Perihelion/MDscale;
     this.semimajoraxis = (this.aphelion + this.perihelion)/2;
+    this.semiminoraxis = Math.sqrt(this.aphelion * this.perihelion);
     this.orbitalperiod = orbitalperiod;
     this.axialtilt = axialtilt;
     this.orbitaltilt = orbitaltilt;
@@ -258,7 +304,7 @@ class Moons {
     rotateZ((Planeter[this.planet].axialtilt - this.axialtilt) * PI/180);
     translate(this.x, this.y, this.z);
     ambientMaterial(this.red, this.green, this.blue);
-    sphere(this.radius);
+    sphere(this.radius/Pscaleval);
     pop();
   }
 }
@@ -278,7 +324,7 @@ class Rings {
     translate(Planeter[this.planet].x, Planeter[this.planet].y, Planeter[this.planet].z);
     rotateZ(Planeter[this.planet].axialtilt * PI/180);
     ambientMaterial(this.red, this.green, this.blue);
-    cylinder(this.radius, 0.1, 200);
+    cylinder(this.radius/Pscaleval, 0.1, 200);
     pop();
   }
 }
