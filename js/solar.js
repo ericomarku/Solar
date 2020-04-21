@@ -28,26 +28,26 @@ function setup() {
 
   Sslider = createSlider(0.1, 2, 1, 0);
   Sslider.position(10, 10);
-  Sslider.style('width', '200px');
+  Sslider.style('width', '300px');
 
   Pslider = createSlider(0.3, 2, 1, 0);
   Pslider.position(10, 30);
-  Pslider.style('width', '200px');
+  Pslider.style('width', '300px');
 
-  Dslider = createSlider(0.1, 10, 1, 0);
+  Dslider = createSlider(0.001, 2, 1, 0);
   Dslider.position(10, 50);
-  Dslider.style('width', '200px');
+  Dslider.style('width', '300px');
 
   Stextbox = createSpan('');
-  Stextbox.position(220, 10);
+  Stextbox.position(320, 10);
   Stextbox.style('color', 'white');
 
   Ptextbox = createSpan('');
-  Ptextbox.position(220, 30);
+  Ptextbox.position(320, 30);
   Ptextbox.style('color', 'white');
 
   Dtextbox = createSpan('');
-  Dtextbox.position(220, 50);
+  Dtextbox.position(320, 50);
   Dtextbox.style('color', 'white');
 
   sun = new Sun(695700, 0, 255, 185, 0, PI);
